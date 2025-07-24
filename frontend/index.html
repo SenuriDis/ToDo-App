@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ToDo Bliss</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.0/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap');
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #e0f7fa, #b2ebf2);
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .app-container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+    h1 {
+      font-family: 'Pacifico', cursive;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      font-size: 2.5em;
+    }
+    h2 {
+      color: #34495e;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 10px;
+      border: 2px solid #bdc3c7;
+      border-radius: 5px;
+      font-size: 1em;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      border-color: #3498db;
+    }
+    button {
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: #ecf0f1;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    li p {
+      margin: 0;
+      color: #2c3e50;
+    }
+    li .done-btn {
+      background-color: #2ecc71;
+    }
+    li .done-btn:hover {
+      background-color: #27ae60;
+    }
+    .loading, .no-tasks {
+      color: #7f8c8d;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { createRoot } = ReactDOM;
+
+    const TaskForm = () => {
+      const [title, setTitle] = useState('');
+      const [description, setDescription] = useState('');
+      const [error, setError] = useState(null);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!title) {
+          setError('Title is required');
+          return;
+        }
+        fetch('http://localhost:8000/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description }),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+          })
+          .then(() => {
+            setTitle('');
+            setDescription('');
+            setError(null);
+            window.location.reload();
+          })
+          .catch(() => setError('Failed to create task'));
+      };
+
+      return (
+        <div>
+          <h2>Create New Task</h2>
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Task Title"
+            />
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Description (optional)"
+            />
+            <button type="submit">Add Task</button>
+            {error && <p className="error">{error}</p>}
+          </form>
+        </div>
+      );
+    };
+
+    const TaskList = () => {
+      const [tasks, setTasks] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      useEffect(() => {
+        fetchTasks();
+      }, []);
+
+      const fetchTasks = () => {
+        fetch('http://localhost:8000/api/tasks')
+          .then((res) => {
+            if (!res.ok) throw new Error('Failed');
+            return res.json();
+          })
+          .then((data) => setTasks(data))
+          .catch(() => setError('Failed to fetch tasks'))
+          .finally(() => setLoading(false));
+      };
+
+      const handleComplete = (id) => {
+        fetch(`http://localhost:8000/api/tasks/${id}/complete`, {
+          method: 'PATCH',
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error('Failed');
+            return fetchTasks();
+          })
+          .catch(() => setError('Failed to complete task'));
+      };
+
+      if (loading) return <p className="loading">Loading...</p>;
+      if (error) return <p className="error">{error}</p>;
+
+      return (
+        <div>
+          <h2>Your Tasks</h2>
+          {tasks.length === 0 ? (
+            <p className="no-tasks">No tasks available.</p>
+          ) : (
+            <ul>
+              {tasks.map((task) => (
+                <li key={task.id}>
+                  <div>
+                    <p>{task.title}</p>
+                    {task.description && <p>{task.description}</p>}
+                  </div>
+                  {!task.completed && (
+                    <button
+                      className="done-btn"
+                      onClick={() => handleComplete(task.id)}
+                    >
+                      Done
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      );
+    };
+
+    const App = () => (
+      <div className="app-container">
+        <h1>ToDo Bliss</h1>
+        <TaskForm />
+        <TaskList />
+      </div>
+    );
+
+    const root = createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
