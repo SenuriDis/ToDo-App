@@ -22,6 +22,9 @@
     "supertest": "^7.1.4"
   },
   "jest": {
-    "testMatch": ["**/tests/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"]
+    "testMatch": [
+      "**/tests/**/*.[jt]s?(x)",
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ]
   }
 }
