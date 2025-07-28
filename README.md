@@ -23,8 +23,8 @@ Ensure Docker Desktop is installed and running.
 ## Running the Project
 
 1. Navigate to the ToDo folder in PowerShell and start all components:
-
-     docker-compose up --build
+  
+         docker-compose up --build
 
 2. Wait for the services to start (check logs for confirmation).
 
@@ -32,11 +32,11 @@ Ensure Docker Desktop is installed and running.
 
 4. To stop, press Ctrl+C, then run:
 
-     docker-compose down
+        docker-compose down
 
 5. Use MySQL Workbench to connect to localhost:3307 (user: root, password: rootpassword) to verify tasks:
 
-    SELECT * FROM todo_db.task;
+        SELECT * FROM todo_db.task;
 
 ## Usage
 
@@ -55,8 +55,8 @@ Ensure Docker Desktop is installed and running.
 
      GET /api/tasks/:id/complete - Update the task as completed.
 
-## Future Enhancements
+## Testing
 
-Containerize the frontend with Docker (optional).
-Add unit/integration tests for backend and frontend.
-Add more styling or features (TBD).
+**Backend** Add unit and intergration testing
+     
+     npm test 
