@@ -8,9 +8,12 @@ Simple full-stack ToDo application with a React frontend, Node.js backend, and M
 
 ## Prerequisites
 -Node.js (v14 or higher)
+
 -Docker Desktop
+
 -PowerShell
--MySQL Workbench (optional for database inspection)
+
+-MySQL Workbench 
 
 ## Installation
 
@@ -19,19 +22,21 @@ Ensure Docker Desktop is installed and running.
 
 ## Running the Project
 
-1. Navigate to the ToDo folder in PowerShell and start the backend and database:docker-compose up --build
+1. Navigate to the ToDo folder in PowerShell and start all components:
 
-2. Wait for Server running on port 8000 in the logs.
+     docker-compose up --build
 
-3. In a separate PowerShell window, navigate to the frontend folder and start the frontend:cd frontend
-npm install -g serve
-serve -s .
+2. Wait for the services to start (check logs for confirmation).
 
-4. Confirm with Serving "/frontend" at http://localhost:3000.
+3. Open your browser at http://localhost:3000 to use the app.
 
-5. Open your browser at http://localhost:3000 to use the app.
+4. To stop, press Ctrl+C, then run:
 
-6. To stop the services, press Ctrl+C in both terminals, then run:docker-compose down in the ToDo folder.
+     docker-compose down
+
+5. Use MySQL Workbench to connect to localhost:3307 (user: root, password: rootpassword) to verify tasks:
+
+    SELECT * FROM todo_db.task;
 
 ## Usage
 
